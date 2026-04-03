@@ -1,0 +1,46 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+ENV/
+
+# Python кэш
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# База данных
+database.db
+*.sqlite
+*.sqlite3
+
+# Логи
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Переменные окружения
+.env.local
+.env.*.local
+
+# Временные файлы
+*.tmp
+*.temp
+*.bak
+
+# Node modules (если будет фронтенд с npm)
+node_modules/
+npm-debug.log
+package-lock.json

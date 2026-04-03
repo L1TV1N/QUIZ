@@ -1,0 +1,35 @@
+# Auto detect text files and normalize line endings to LF
+* text=auto
+
+# Python
+*.py text eol=lf
+*.pyw text eol=lf
+*.pyx text eol=lf
+*.pyc binary
+*.pyo binary
+*.egg-info/ text eol=lf
+
+# Shell
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.exe binary
+*.dll binary
+
+# Web
+*.html text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+
+# Database
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Ignore file attributes for untracked files
+.* !.gitignore !.gitattributes !.env.example
