@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import useQuizStore from './store/quizStore'
+import { useSound } from './hooks/useSound'
 import { Step0ModeSelection } from './components/steps/Step0ModeSelection'
 import { Step1Intro } from './components/steps/Step1Intro'
 import { Step2Property } from './components/steps/Step2Property'
@@ -114,6 +115,41 @@ function App() {
     
     checkBackend()
   }, [])
+
+  // Обработчик скролла для звуков
+  const { play } = useSound()
+  const lastScrollYRef = useRef(0)
+  const scrollTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // Очищаем предыдущий таймаут чтобы избежать слишком частых звуков
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+      
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (currentScrollY > lastScrollYRef.current) {
+          // Скроллим вниз
+          play('scrollRight')
+        } else if (currentScrollY < lastScrollYRef.current) {
+          // Скроллим вверх
+          play('scrollLeft')
+        }
+        lastScrollYRef.current = currentScrollY
+      }, 100) // Задержка 100ms для дебаунса
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
+  }, [play])
 
   const handleAdminLogin = () => {
     setIsAdminLoggedIn(true)
