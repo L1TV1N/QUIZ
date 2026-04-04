@@ -18,6 +18,46 @@ body {
   min-height: 100vh;
 }
 
+/* Глобальные стили для темной темы */
+html.dark {
+  background: #111827;
+}
+
+html.dark body {
+  background: #111827;
+  color: #ffffff;
+}
+
+/* Все текстовые элементы белые в темной теме */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #ffffff;
+}
+
+html.dark p,
+html.dark span,
+html.dark div,
+html.dark label,
+html.dark li,
+html.dark td,
+html.dark th {
+  color: #f3f4f6;
+}
+
+/* Более темный текст для secondary элементов */
+html.dark .text-gray-500,
+html.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
+
 .container-quiz {
   max-width: 800px;
   margin: 0 auto;

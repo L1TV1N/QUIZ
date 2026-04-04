@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Card, Button, ProgressBar } from './SharedUI'
+import { Card, Button, ProgressBar } from './ui/SharedUI'
 
 export const QuizStep = ({ 
   title,
@@ -19,15 +19,15 @@ export const QuizStep = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen flex items-center justify-center py-8 px-4"
+      className="min-h-screen flex items-center justify-center py-8 px-4 bg-white dark:bg-gray-900 transition-colors"
     >
       <div className="w-full max-w-2xl">
         <ProgressBar current={currentStep} total={totalSteps} />
         
         <Card className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-gray-900">{title}</h1>
+          <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">{title}</h1>
           {subtitle && (
-            <p className="text-lg text-gray-600 mb-8">{subtitle}</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">{subtitle}</p>
           )}
           
           <div className="my-8">
@@ -40,6 +40,7 @@ export const QuizStep = ({
                 variant="secondary"
                 onClick={onPrev}
                 className="flex-1"
+                sound="prev"
               >
                 ← Назад
               </Button>
@@ -51,6 +52,7 @@ export const QuizStep = ({
                 onClick={onNext}
                 disabled={nextDisabled}
                 className="flex-1"
+                sound="next"
               >
                 Далее →
               </Button>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест звуков - Smart Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .sound-test {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .next-btn { background: #4CAF50; color: white; }
+        .prev-btn { background: #2196F3; color: white; }
+        .select-btn { background: #FF9800; color: white; }
+        .submit-btn { background: #9C27B0; color: white; }
+        .error-btn { background: #f44336; color: white; }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        .status.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .status.success {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        .file-list {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .file-list h3 {
+            margin-top: 0;
+        }
+        .file-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-family: monospace;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔊 Тест звуков - Smart Quiz</h1>
+    
+    <div class="file-list">
+        <h3>Файлы звуков:</h3>
+        <div class="file-item">✓ /sounds/далее.mp3</div>
+        <div class="file-item">✓ /sounds/назад.mp3</div>
+        <div class="file-item">✓ /sounds/выбор.mp3</div>
+        <div class="file-item">✓ /sounds/анкета отправлена.mp3</div>
+        <div class="file-item">✓ /sounds/ошибка.mp3</div>
+    </div>
+
+    <div class="sound-test">
+        <button class="next-btn" onclick="playSound('next')">▶ Далее (next)</button>
+        <button class="prev-btn" onclick="playSound('prev')">◀ Назад (prev)</button>
+        <button class="select-btn" onclick="playSound('select')">✓ Выбор (select)</button>
+        <button class="submit-btn" onclick="playSound('submit')">📤 Отправка (submit)</button>
+        <button class="error-btn" onclick="playSound('error')">⚠ Ошибка (error)</button>
+        <button style="background: #666; color: white;" onclick="testAllSounds()">🔁 Все звуки</button>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+
+    <script>
+        const sounds = {
+            next: new Audio('/sounds/далее.mp3'),
+            prev: new Audio('/sounds/назад.mp3'),
+            select: new Audio('/sounds/выбор.mp3'),
+            submit: new Audio('/sounds/анкета отправлена.mp3'),
+            error: new Audio('/sounds/ошибка.mp3'),
+        };
+
+        // Устанавливаем громкость
+        Object.values(sounds).forEach(sound => {
+            sound.volume = 0.6;
+        });
+
+        function playSound(soundType) {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                if (sounds[soundType]) {
+                    sounds[soundType].currentTime = 0;
+                    sounds[soundType].play()
+                        .then(() => {
+                            showStatus(`✅ Звук "${soundType}" воспроизведён успешно!`, 'success');
+                        })
+                        .catch(err => {
+                            showStatus(`❌ Ошибка воспроизведения "${soundType}": ${err.message}`, 'error');
+                            console.error(`Ошибка при воспроизведении ${soundType}:`, err);
+                        });
+                } else {
+                    showStatus(`❌ Звук "${soundType}" не найден!`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Ошибка: ${error.message}`, 'error');
+                console.error('Ошибка при воспроизведении звука:', error);
+            }
+        }
+
+        function testAllSounds() {
+            let index = 0;
+            const soundTypes = Object.keys(sounds);
+            
+            function playNextSound() {
+                if (index < soundTypes.length) {
+                    playSound(soundTypes[index]);
+                    index++;
+                    setTimeout(playNextSound, 1500);
+                } else {
+                    showStatus('✅ Все звуки протестированы!', 'success');
+                }
+            }
+            
+            playNextSound();
+        }
+
+        function showStatus(message, type = '') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+            statusDiv.style.display = 'block';
+        }
+
+        // Проверяем доступность звуков при загрузке
+        window.addEventListener('load', () => {
+            let loadedCount = 0;
+            Object.entries(sounds).forEach(([name, audio]) => {
+                audio.addEventListener('canplay', () => {
+                    loadedCount++;
+                    if (loadedCount === Object.keys(sounds).length) {
+                        showStatus('✅ Все файлы звуков успешно загружены!', 'success');
+                    }
+                }, { once: true });
+
+                audio.addEventListener('error', (e) => {
+                    console.error(`Ошибка загрузки ${name}:`, e);
+                }, { once: true });
+            });
+
+            // Установим таймаут, если звуки не загружаются
+            setTimeout(() => {
+                if (loadedCount < Object.keys(sounds).length) {
+                    console.warn(`Загружено ${loadedCount} из ${Object.keys(sounds).length} звуков`);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

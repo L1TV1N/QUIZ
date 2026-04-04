@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Админ-панель - Smart Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .animate-spin {
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+        }
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            font-weight: 600;
+            color: #60a5fa;
+        }
+        tr:hover {
+            background: rgba(71, 85, 105, 0.1);
+        }
+        .stat-card {
+            padding: 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-ai {
+            background: rgba(168, 85, 247, 0.3);
+            color: #c4b5fd;
+        }
+        .badge-normal {
+            background: rgba(96, 165, 250, 0.3);
+            color: #93c5fd;
+        }
+        button {
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        (async function() {
+            // Проверяем аутентификацию
+            const checkAuth = () => {
+                const loggedIn = localStorage.getItem('adminLoggedIn');
+                const loginTime = localStorage.getItem('adminLoginTime');
+                
+                if (loggedIn && loginTime) {
+                    const hoursPassed = (Date.now() - parseInt(loginTime)) / (1000 * 60 * 60);
+                    if (hoursPassed < 24) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            const isLoggedIn = checkAuth();
+
+            // Рендерим интерфейс
+            const root = document.getElementById('root');
+
+            if (!isLoggedIn) {
+                // Экран входа
+                root.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="w-full max-w-md">
+                            <div class="card p-8 shadow-2xl">
+                                <div class="text-center mb-8">
+                                    <div class="text-5xl mb-4">🔐</div>
+                                    <h1 class="text-3xl font-bold gradient-text mb-2">Админ-панель</h1>
+                                    <p class="text-gray-400">Введите пароль для доступа</p>
+                                </div>
+                                
+                                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                                            🔑 Пароль
+                                        </label>
+                                        <input 
+                                            type="password" 
+                                            id="password"
+                                            placeholder="Введите пароль..."
+                                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                                        />
+                                    </div>
+                                    
+                                    <div id="error" class="hidden p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-300 text-sm"></div>
+                                    
+                                    <button 
+                                        type="submit"
+                                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-lg"
+                                    >
+                                        🚀 Войти
+                                    </button>
+                                </form>
+                                
+                                <div class="mt-6 p-4 bg-slate-700/30 rounded-lg border border-slate-600 text-center">
+                                    <p class="text-xs text-gray-400">Пароль: admin2026</p>
+                                </div>
+                            </div>
+
+                            <a href="/" class="block mt-6 text-center text-gray-400 hover:text-blue-400 transition-colors">
+                                ← Вернуться на главную
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                window.handleLogin = function(e) {
+                    e.preventDefault();
+                    const password = document.getElementById('password').value;
+                    const errorDiv = document.getElementById('error');
+                    
+                    if (password === 'admin2026') {
+                        localStorage.setItem('adminLoggedIn', 'true');
+                        localStorage.setItem('adminLoginTime', Date.now().toString());
+                        location.reload();
+                    } else {
+                        errorDiv.textContent = '❌ Неверный пароль';
+                        errorDiv.classList.remove('hidden');
+                        document.getElementById('password').value = '';
+                    }
+                };
+            } else {
+                // Основная панель
+                root.innerHTML = `<div class="p-8" id="adminContent">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 class="text-4xl font-bold gradient-text">📊 Админ-панель</h1>
+                            <p class="text-gray-400 mt-2">Отслеживание всех заявок и статистики</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <button onclick="location.reload()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                                🔄 Обновить
+                            </button>
+                            <button onclick="logout()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
+                                🚪 Выход
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="loadingSpinner" class="flex justify-center items-center min-h-96">
+                        <div class="text-4xl animate-spin">⏳</div>
+                    </div>
+
+                    <div id="content" style="display: none;">
+                        <!-- Статистика -->
+                        <div id="statsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"></div>
+                        
+                        <!-- Графики -->
+                        <div id="chartsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"></div>
+                        
+                        <!-- Экспорт -->
+                        <div class="card p-6 mb-8">
+                            <h2 class="text-xl font-bold mb-4">📥 Экспорт данных</h2>
+                            <div class="flex gap-4">
+                                <button onclick="exportData('csv')" class="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg">
+                                    📊 Скачать CSV
+                                </button>
+                                <button onclick="exportData('json')" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                                    📄 Скачать JSON
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Таблица заявок -->
+                        <div class="card rounded-lg border border-slate-600 overflow-hidden">
+                            <div class="p-6 border-b border-slate-600">
+                                <h2 class="text-xl font-bold">📋 Список всех заявок (<span id="leadsCount">0</span>)</h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table id="leadsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Имя</th>
+                                            <th>Тип</th>
+                                            <th>Стиль</th>
+                                            <th>Площадь</th>
+                                            <th>Бюджет</th>
+                                            <th>Контакт</th>
+                                            <th>Режим</th>
+                                            <th>Дата</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leadsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+                // Загружаем данные
+                loadData();
+                setInterval(loadData, 5000); // Обновляем каждые 5 сек
+            }
+
+            window.loadData = async function() {
+                try {
+                    const [statsRes, leadsRes] = await Promise.all([
+                        fetch('http://localhost:5000/api/stats'),
+                        fetch('http://localhost:5000/api/leads')
+                    ]);
+
+                    if (!statsRes.ok || !leadsRes.ok) throw new Error('Failed to fetch');
+
+                    const stats = await statsRes.json();
+                    const leads = await leadsRes.json();
+
+                    // Скрыть спиннер
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+
+                    // Статистика
+                    const statsHtml = `
+                        <div class="stat-card text-center">
+                            <div class="text-3xl mb-2">📋</div>
+                            <p class="text-gray-400 mb-2">Всего заявок</p>
+                            <p class="text-2xl font-bold">${stats.total_leads}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-3xl mb-2">🤖</div>
+                            <p class="text-gray-400 mb-2">AI режим</p>
+                            <p class="text-2xl font-bold">${stats.ai_mode}</p>
+                            <p class="text-purple-400 text-sm">${stats.ai_mode_percentage}%</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-3xl mb-2">📝</div>
+                            <p class="text-gray-400 mb-2">Обычный режим</p>
+                            <p class="text-2xl font-bold">${stats.normal_mode}</p>
+                            <p class="text-blue-400 text-sm">${(100 - stats.ai_mode_percentage).toFixed(1)}%</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-3xl mb-2">📐</div>
+                            <p class="text-gray-400 mb-2">Средняя площадь</p>
+                            <p class="text-2xl font-bold">${stats.average_area}м²</p>
+                        </div>
+                    `;
+                    document.getElementById('statsContainer').innerHTML = statsHtml;
+
+                    // Таблица заявок
+                    const leadsBody = document.getElementById('leadsBody');
+                    leadsBody.innerHTML = leads.map(lead => `
+                        <tr>
+                            <td>${lead.id}</td>
+                            <td class="font-medium">${lead.name}</td>
+                            <td>${lead.property_type || '—'}</td>
+                            <td>${lead.style || '—'}</td>
+                            <td>${lead.area || '—'}м²</td>
+                            <td>${lead.budget || '—'}</td>
+                            <td>
+                                <div class="text-xs">
+                                    ${lead.phone ? `<div>📞 ${lead.phone}</div>` : ''}
+                                    ${lead.email ? `<div>📧 ${lead.email}</div>` : ''}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge ${lead.ai_mode ? 'badge-ai' : 'badge-normal'}">
+                                    ${lead.ai_mode ? '🤖 AI' : '📝 Обычный'}
+                                </span>
+                            </td>
+                            <td class="text-gray-400">${new Date(lead.created_at).toLocaleDateString('ru-RU')}</td>
+                        </tr>
+                    `).join('');
+                    document.getElementById('leadsCount').textContent = leads.length;
+                } catch (err) {
+                    console.error('Error loading data:', err);
+                }
+            };
+
+            window.exportData = async function(format) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/export-${format}`);
+                    if (!response.ok) throw new Error('Export failed');
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `leads_${new Date().toISOString().split('T')[0]}.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } catch (err) {
+                    alert('Ошибка при экспорте');
+                }
+            };
+
+            window.logout = function() {
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = '/';
+            };
+        })();
+    </script>
+</body>
+</html>

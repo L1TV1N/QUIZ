@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, DateTime, Float, Integer
+from sqlalchemy import create_engine, Column, String, DateTime, Float, Integer, Boolean, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -14,17 +14,29 @@ class Lead(Base):
     __tablename__ = "leads"
 
     id = Column(Integer, primary_key=True, index=True)
-    property_type = Column(String, nullable=False)
-    area = Column(String, nullable=False)
-    rooms = Column(String, nullable=False)
-    condition = Column(String, nullable=False)
-    style = Column(String, nullable=False)
-    budget = Column(String, nullable=False)
-    timeline = Column(String, nullable=False)
-    name = Column(String, nullable=False)
-    contact = Column(String, nullable=False)
+    
+    # Режим работы
+    ai_mode = Column(Boolean, default=False, nullable=False)
+    
+    # Основные поля из ТЗ
+    property_type = Column(String, nullable=False)  # Тип помещения
+    zones = Column(Text, nullable=False)  # Зоны (JSON или список через запятую)
+    area = Column(Integer, nullable=False)  # Площадь (число)
+    style = Column(String, nullable=False)  # Стиль (одиночный выбор)
+    budget = Column(String, nullable=False)  # Бюджет
+    
+    # Контактные данные
+    name = Column(String, nullable=False)  # Имя (обязательно)
+    phone = Column(String, nullable=False)  # Телефон (обязательно)
+    email = Column(String, nullable=True)  # Email (опционально)
+    comment = Column(Text, nullable=True)  # Комментарий (опционально)
+    agree_to_terms = Column(Boolean, default=False, nullable=False)  # Согласие на обработку
+    
+    # Метаинформация
     created_at = Column(DateTime, default=datetime.utcnow)
-    ai_result = Column(String, nullable=True)
+    ai_result = Column(Text, nullable=True)  # Результат AI
+    ai_questions = Column(Text, nullable=True)  # AI вопросы (JSON)
 
 
 Base.metadata.create_all(bind=engine)
+

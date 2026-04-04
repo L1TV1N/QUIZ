@@ -1,24 +1,37 @@
 import { create } from 'zustand'
 
 const useQuizStore = create((set) => ({
-  // Состояние квиза (из конституции)
+  // Состояние квиза (из ТЗ с корректировками)
   quizState: {
-    propertyType: '',
-    area: '',
-    rooms: '',
-    condition: '',
-    style: [],
-    budget: '',
-    timeline: '',
-    name: '',
-    contact: '',
+    // Режим работы
+    aiMode: false,
+    
+    // Основные поля из ТЗ
+    propertyType: '',      // Тип помещения (квартира, дом, офис, коммерч, студия, другое)
+    zones: [],             // Зоны (множественный выбор - кухня, гостиная и т.д.)
+    area: 60,              // Площадь помещения (число, ползунок 20-300)
+    style: '',             // Стиль интерьера (одиночный выбор - современный, минимализм и т.д.)
+    budget: '',            // Бюджет (одиночный выбор)
+    
+    // AI режим - дополнительные ответы
+    aiAnswers: {},         // Ответы на AI вопросы {questionId: answer}
+    
+    // Контактные данные
+    name: '',              // Имя (обязательно)
+    phone: '',             // Телефон (обязательно)
+    email: '',             // Email (опционально)
+    comment: '',           // Комментарий (опционально)
+    agreeToTerms: false,   // Чекбокс согласия на обработку данных (обязательно)
   },
   
-  // Текущий шаг (0-5 это шаги, 6 - финальный результат)
+  // Текущий шаг квиза
   currentStep: 0,
   
   // Результат AI
   aiResult: null,
+  
+  // AI-вопросы (для промежуточного этапа)
+  aiQuestions: [],
   
   // Loading states
   isLoading: false,
@@ -34,21 +47,28 @@ const useQuizStore = create((set) => ({
       quizState: { ...state.quizState, [field]: value },
     })),
   
+  // Обновить стиль (ОДИНОЧНЫЙ выбор по ТЗ)
   updateStyle: (style) =>
+    set((state) => ({
+      quizState: { ...state.quizState, style },
+    })),
+  
+  // Обновить зоны (множественный выбор)
+  updateZones: (zone) =>
     set((state) => {
-      const currentStyles = state.quizState.style || []
-      const newStyles = currentStyles.includes(style)
-        ? currentStyles.filter((s) => s !== style)
-        : [...currentStyles, style]
+      const currentZones = state.quizState.zones || []
+      const newZones = currentZones.includes(zone)
+        ? currentZones.filter((z) => z !== zone)
+        : [...currentZones, zone]
       
       return {
-        quizState: { ...state.quizState, style: newStyles },
+        quizState: { ...state.quizState, zones: newZones },
       }
     }),
   
   nextStep: () =>
     set((state) => ({
-      currentStep: Math.min(state.currentStep + 1, 6),
+      currentStep: state.currentStep + 1,
     })),
   
   prevStep: () =>
@@ -66,6 +86,11 @@ const useQuizStore = create((set) => ({
       aiResult: result,
     })),
   
+  setAiQuestions: (questions) =>
+    set(() => ({
+      aiQuestions: questions,
+    })),
+  
   setLoading: (loading) =>
     set(() => ({
       isLoading: loading,
@@ -74,18 +99,22 @@ const useQuizStore = create((set) => ({
   reset: () =>
     set(() => ({
       quizState: {
+        aiMode: false,
         propertyType: '',
-        area: '',
-        rooms: '',
-        condition: '',
-        style: [],
+        zones: [],
+        area: 60,
+        style: '',
         budget: '',
-        timeline: '',
+        aiAnswers: {},
         name: '',
-        contact: '',
+        phone: '',
+        email: '',
+        comment: '',
+        agreeToTerms: false,
       },
       currentStep: 0,
       aiResult: null,
+      aiQuestions: [],
       isLoading: false,
     })),
 }))
