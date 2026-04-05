@@ -1,6 +1,8 @@
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { QuizStep } from '../QuizStep'
 import { Card } from '../ui/SharedUI'
+import { useSound } from '../../hooks/useSound'
 import useQuizStore from '../../store/quizStore'
 
 export const Step4Area = ({ onNext, onPrev }) => {
@@ -11,9 +13,20 @@ export const Step4Area = ({ onNext, onPrev }) => {
   const maxArea = 300
   const minArea = 20
   const step = 5
+  const { play } = useSound()
+  const lastAreaRef = useRef(area)
 
   const handleSliderChange = (e) => {
-    updateField('area', parseInt(e.target.value))
+    const newValue = parseInt(e.target.value)
+
+    if (newValue > lastAreaRef.current) {
+      play('scrollRight')
+    } else if (newValue < lastAreaRef.current) {
+      play('scrollLeft')
+    }
+
+    lastAreaRef.current = newValue
+    updateField('area', newValue)
   }
 
   const handleInputChange = (e) => {
