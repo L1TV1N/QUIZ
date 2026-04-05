@@ -7,6 +7,7 @@ import os
 import base64
 import uuid
 from datetime import datetime
+from config_manager import get_label_maps, load_config
 
 
 class GigaChatClient:
@@ -137,6 +138,17 @@ def generate_ai_result(quiz_data):
         str: Текстовое описание проекта
     """
     
+    labels = get_label_maps(load_config())
+    quiz_data = dict(quiz_data or {})
+    quiz_data["propertyTypeLabel"] = labels["property"].get(quiz_data.get("propertyType"), quiz_data.get("propertyType", "помещение"))
+    quiz_data["styleLabel"] = labels["style"].get(quiz_data.get("style"), quiz_data.get("style", "не указан"))
+    quiz_data["budgetLabel"] = labels["budget"].get(quiz_data.get("budget"), quiz_data.get("budget", "не указан"))
+    zone_ids = quiz_data.get("zones") or []
+    if isinstance(zone_ids, list):
+        quiz_data["zonesLabels"] = [labels["zone"].get(z, z) for z in zone_ids]
+    else:
+        quiz_data["zonesLabels"] = []
+
     # Проверяем наличие GigaChat ключа
     gigachat_credentials = os.getenv("GIGACHAT_CREDENTIALS")
     
@@ -155,12 +167,12 @@ def _generate_with_gigachat(quiz_data, credentials):
     
     try:
         # Формируем промпт
-        style_text = ", ".join(quiz_data.get("style", ["современный"])[:3])
-        property_type = quiz_data.get("propertyType", "помещение").lower()
+        style_text = quiz_data.get("styleLabel", quiz_data.get("style", "современный"))
+        property_type = str(quiz_data.get("propertyTypeLabel", quiz_data.get("propertyType", "помещение"))).lower()
         area = quiz_data.get("area", "неизвестная площадь")
         rooms = quiz_data.get("rooms", "неизвестное количество")
         condition = quiz_data.get("condition", "неизвестное состояние")
-        budget = quiz_data.get("budget", "средний").lower()
+        budget = str(quiz_data.get("budgetLabel", quiz_data.get("budget", "средний"))).lower()
         timeline = quiz_data.get("timeline", "в течение месяца").lower()
         
         prompt = f"""
@@ -171,6 +183,7 @@ def _generate_with_gigachat(quiz_data, credentials):
 - Площадь: {area}м²
 - Количество комнат: {rooms}
 - Состояние: {condition}
+- Выбранные зоны: {", ".join(quiz_data.get("zonesLabels", [])) or "не указаны"}
 - Предпочитаемые стили: {style_text}
 - Бюджет: {budget}
 - Сроки: {timeline}
@@ -215,19 +228,21 @@ def _generate_with_gigachat(quiz_data, credentials):
 def _generate_fallback(quiz_data):
     """Fallback-генерация, если реальный AI не доступен"""
     
-    style_text = ", ".join(quiz_data.get("style", ["современный"])[:3])
-    property_type = quiz_data.get("propertyType", "помещение").lower()
+    style_text = quiz_data.get("styleLabel", quiz_data.get("style", "современный"))
+    property_type = str(quiz_data.get("propertyTypeLabel", quiz_data.get("propertyType", "помещение"))).lower()
     area = quiz_data.get("area", "неизвестная площадь")
-    budget = quiz_data.get("budget", "средний").lower()
+    budget = str(quiz_data.get("budgetLabel", quiz_data.get("budget", "средний"))).lower()
     timeline = quiz_data.get("timeline", "в течение месяца").lower()
     
+    zones_text = ", ".join(quiz_data.get("zonesLabels", [])) or "не указаны"
+
     result = f"""
 ✨ **Ваш персональный дизайн-проект готов**
 
-Мы проанализировали ваши предпочтения и готовы воплотить вашу мечту в жизь!
+Мы проанализировали ваши предпочтения и готовы воплотить вашу мечту в жизнь!
 
 **Концепция проекта:**
-Современный интерьер в стиле {style_text} для вашего {property_type} площадью {area}м². Дизайн будет сочетать функциональность с эстетикой, создавая пространство, которое полностью отражает ваш вкус и потребности. Мы подберём материалы и мебель, которые гармонично впишутся в выбранный вами стиль.
+Современный интерьер в стиле {style_text} для вашего {property_type} площадью {area}м². Дизайн будет сочетать функциональность с эстетикой, создавая пространство, которое полностью отражает ваш вкус и потребности. Мы подберём материалы и мебель, которые гармонично впишутся в выбранный вами стиль. Выбраны зоны: {zones_text}.
 
 **Рекомендации по реализации:**
 • Оптимизация планировки с учётом вашего пространства

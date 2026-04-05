@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { defaultQuizConfig } from '../config/defaultQuizConfig'
 
 const useQuizStore = create((set) => ({
   // Состояние квиза (из ТЗ с корректировками)
@@ -27,6 +28,8 @@ const useQuizStore = create((set) => ({
   // Текущий шаг квиза
   currentStep: 0,
   
+  quizConfig: defaultQuizConfig,
+
   // Результат AI
   aiResult: null,
   
@@ -81,6 +84,11 @@ const useQuizStore = create((set) => ({
       currentStep: step,
     })),
   
+  setQuizConfig: (config) =>
+    set(() => ({
+      quizConfig: config || defaultQuizConfig,
+    })),
+
   setAiResult: (result) =>
     set(() => ({
       aiResult: result,
@@ -113,6 +121,7 @@ const useQuizStore = create((set) => ({
         agreeToTerms: false,
       },
       currentStep: 0,
+      quizConfig: defaultQuizConfig,
       aiResult: null,
       aiQuestions: [],
       isLoading: false,

@@ -24,6 +24,7 @@ function App() {
   const reset = useQuizStore((state) => state.reset)
   const aiResult = useQuizStore((state) => state.aiResult)
   const aiMode = useQuizStore((state) => state.quizState.aiMode)
+  const setQuizConfig = useQuizStore((state) => state.setQuizConfig)
 
   // States для навигации промежуточных экранов
   const [showAlmostReady, setShowAlmostReady] = useState(false)
@@ -96,6 +97,21 @@ function App() {
       document.documentElement.classList.remove('dark')
     }
   }, [])
+
+  useEffect(() => {
+    const loadQuizConfig = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/quiz-config')
+        if (!response.ok) return
+        const data = await response.json()
+        setQuizConfig(data)
+      } catch (error) {
+        console.warn('⚠️ Не удалось загрузить quiz-config:', error.message)
+      }
+    }
+
+    loadQuizConfig()
+  }, [setQuizConfig])
 
   // Проверяем backend на старте
   useEffect(() => {

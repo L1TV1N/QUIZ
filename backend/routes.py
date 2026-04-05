@@ -7,6 +7,7 @@ import os
 import json
 import csv
 import io
+from config_manager import load_config, save_config, reset_config
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -165,6 +166,35 @@ def get_leads():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+
+@api.route('/quiz-config', methods=['GET'])
+def get_quiz_config():
+    try:
+        return jsonify(load_config()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@api.route('/quiz-config', methods=['PUT'])
+def update_quiz_config():
+    try:
+        payload = request.get_json() or {}
+        config = save_config(payload)
+        return jsonify({"success": True, "config": config}), 200
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500
+
+
+@api.route('/quiz-config/reset', methods=['POST'])
+def reset_quiz_config_route():
+    try:
+        config = reset_config()
+        return jsonify({"success": True, "config": config}), 200
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500
 
 
 @api.route('/config', methods=['GET'])
