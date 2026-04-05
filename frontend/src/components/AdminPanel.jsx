@@ -7,7 +7,7 @@ export function AdminPanel({ onLogout }) {
   const [filteredLeads, setFilteredLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [refreshInterval, setRefreshInterval] = useState(5000)
+  const [refreshInterval, setRefreshInterval] = useState(60000)
   
   // Новые состояния для функций
   const [searchQuery, setSearchQuery] = useState('')
@@ -34,7 +34,17 @@ export function AdminPanel({ onLogout }) {
   const [stats2, setStats2] = useState({
     leadsPerDay: []
   })
+  const formatBudget = (budget) => {
+    const budgetLabels = {
+      'up-to-500k': 'До 500 000 ₽',
+      '500k-1m': '500 000 – 1 000 000 ₽',
+      '1m-2m': '1 000 000 – 2 000 000 ₽',
+      '2m+': 'От 2 000 000 ₽',
+      'undecided': 'Пока не знаю'
+    }
 
+    return budgetLabels[budget] || budget || '—'
+  }
   // Загружаем статистику и заявки
   useEffect(() => {
     const fetchData = async () => {
@@ -240,8 +250,15 @@ export function AdminPanel({ onLogout }) {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            📊 Админ-панель PRO
+          <h1 className="flex items-center gap-4 text-4xl font-bold">
+            <span className="relative inline-flex h-12 w-12 items-end justify-center rounded-lg bg-gradient-to-br from-blue-300 to-blue-500 p-2 shadow-lg shadow-blue-500/20">
+              <span className="w-1.5 h-5 rounded-sm bg-pink-400" />
+              <span className="mx-1 w-1.5 h-8 rounded-sm bg-green-300" />
+              <span className="w-1.5 h-6 rounded-sm bg-blue-100" />
+            </span>
+            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Админ-панель PRO
+            </span>
           </h1>
           <p className="text-gray-400 mt-2">Всё под контролем • {filteredLeads.length} заявок в фильтре</p>
         </motion.div>
@@ -438,10 +455,10 @@ export function AdminPanel({ onLogout }) {
                 onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
                 className="px-4 py-2 bg-slate-600 rounded-lg border border-slate-500 cursor-pointer"
               >
-                <option value={5000}>🕐 5 сек</option>
-                <option value={10000}>🕐 10 сек</option>
-                <option value={30000}>🕐 30 сек</option>
                 <option value={60000}>🕐 1 мин</option>
+                <option value={300000}>🕐 5 мин</option>
+                <option value={600000}>🕐 10 мин</option>
+                <option value={1800000}>🕐 30 мин</option>
               </select>
             </div>
           </motion.div>
@@ -514,7 +531,7 @@ export function AdminPanel({ onLogout }) {
                         </td>
                         <td className="px-6 py-4 text-sm">{lead.style || '—'}</td>
                         <td className="px-6 py-4 text-sm">{lead.area || '—'}м²</td>
-                        <td className="px-6 py-4 text-sm">{lead.budget ? `₽${parseInt(lead.budget).toLocaleString('ru-RU')}` : '—'}</td>
+                        <td className="px-6 py-4 text-sm">{formatBudget(lead.budget)}</td>
                         <td className="px-6 py-4 text-xs">
                           {lead.phone && <div className="text-blue-300">📞 {lead.phone}</div>}
                           {lead.email && <div className="text-green-300">📧 {lead.email}</div>}
@@ -583,7 +600,7 @@ export function AdminPanel({ onLogout }) {
                 <DetailRow label="Тип помещения" value={selectedLead.property_type} />
                 <DetailRow label="Стиль" value={selectedLead.style} />
                 <DetailRow label="Площадь" value={`${selectedLead.area}м²`} />
-                <DetailRow label="Бюджет" value={`₽${parseInt(selectedLead.budget || 0).toLocaleString('ru-RU')}`} />
+                <DetailRow label="Бюджет" value={formatBudget(selectedLead.budget)} />
                 <DetailRow label="Зоны" value={selectedLead.zones} />
                 <DetailRow label="Режим" value={selectedLead.ai_mode ? '🤖 AI' : '📝 Обычный'} />
                 <DetailRow label="Дата" value={new Date(selectedLead.created_at).toLocaleString('ru-RU')} />
