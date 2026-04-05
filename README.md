@@ -5,6 +5,9 @@
 ![Version](https://img.shields.io/badge/version-2.0-blue)
 ![Status](https://img.shields.io/badge/status-production-green)
 
+<img width="960" height="843" alt="iMac 24 Mockup on a Textured Rock Base with Dramatic Lighting (Mockuuups Studio)" src="https://github.com/user-attachments/assets/d6248387-65b8-4ab4-9b16-2f860df4a2c7" />
+
+
 ---
 
 ## 🚀 БЫСТРЫЙ СТАРТ (За 2 Клика!)
